@@ -1,0 +1,86 @@
+{
+  "stage": {
+    "id": "stage_sample_001",
+    "name": "Photosynthesis, a first look",
+    "description": "A short sample lesson used to build UI against real-shaped data before the generation pipeline exists.",
+    "createdAt": 1757000000000,
+    "updatedAt": 1757000000000,
+    "languageDirective": "en"
+  },
+  "scenes": [
+    {
+      "id": "scene_sample_001",
+      "stageId": "stage_sample_001",
+      "title": "What is photosynthesis?",
+      "order": 0,
+      "type": "slide",
+      "content": {
+        "type": "slide",
+        "canvas": {
+          "id": "slide_sample_001",
+          "viewportSize": 1000,
+          "viewportRatio": 0.5625,
+          "theme": {
+            "backgroundColor": "#FFFFFF",
+            "themeColors": ["#1A2B4C", "#FF9933", "#333333"],
+            "fontColor": "#18181B",
+            "fontName": "Inter"
+          },
+          "elements": [
+            {
+              "type": "text",
+              "id": "el_sample_title",
+              "left": 80,
+              "top": 80,
+              "width": 840,
+              "height": 120,
+              "rotate": 0,
+              "content": "<p>What is photosynthesis?</p>",
+              "defaultFontName": "Inter",
+              "defaultColor": "#18181B",
+              "textType": "title"
+            },
+            {
+              "type": "text",
+              "id": "el_sample_body",
+              "left": 80,
+              "top": 240,
+              "width": 840,
+              "height": 260,
+              "rotate": 0,
+              "content": "<p>Plants convert sunlight, water, and carbon dioxide into glucose and oxygen. This happens mostly in the leaves, inside structures called chloroplasts.</p>",
+              "defaultFontName": "Inter",
+              "defaultColor": "#333333",
+              "textType": "content"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "scene_sample_002",
+      "stageId": "stage_sample_001",
+      "title": "Quick check",
+      "order": 1,
+      "type": "quiz",
+      "content": {
+        "type": "quiz",
+        "questions": [
+          {
+            "id": "q_sample_001",
+            "type": "single",
+            "question": "Which gas do plants take in during photosynthesis?",
+            "options": [
+              { "label": "Oxygen", "value": "A" },
+              { "label": "Carbon dioxide", "value": "B" },
+              { "label": "Nitrogen", "value": "C" }
+            ],
+            "answer": ["B"],
+            "analysis": "Plants absorb carbon dioxide from the air and release oxygen as a byproduct.",
+            "points": 1
+          }
+        ]
+      }
+    }
+  ]
+}

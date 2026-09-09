@@ -534,21 +534,9 @@ export interface SlideTheme {
 }
 
 /**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- * NOTE on `viewportSize` / `viewportRatio` / `theme`: these are *required* in
- * the canonical contract (matching the app + renderer). The importer parses
- * partial slides and only fills these defaults in `parsedToSlides`; that is an
- * importer-internal staging concern and must not leak into the DSL output.
+ * `viewportSize` / `viewportRatio` / `theme` are required here (matching the
+ * renderer). The importer parses partial slides and fills these defaults
+ * itself; that staging concern must not leak into this contract.
  */
 export interface Slide {
   id: string;
