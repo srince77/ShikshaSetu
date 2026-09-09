@@ -19,6 +19,8 @@ import {
   type MaicDocument,
   type SceneLike,
   type SceneValidator,
+  type StageFreshnessManifest,
+  type StageFreshnessManifestStore,
   type StageValidator,
 } from '@/lib/db/document-store';
 import type { Queryable as DocQueryable, WithTransaction } from '@/lib/db/pg-types';
@@ -63,7 +65,7 @@ function queryableFor(connection: Pick<PoolClientLike, 'query'>): DocQueryable {
 }
 
 class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
-  implements DocumentStore<TScene, TStage>, DocumentFolderStore
+  implements DocumentStore<TScene, TStage>, DocumentFolderStore, StageFreshnessManifestStore
 {
   constructor(
     private readonly inner: PgDocumentStore<TScene, TStage>,
@@ -116,7 +118,7 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
   }
 
   /** The trigger-maintained freshness manifest is a read: capability-by-id. */
-  async readFreshnessManifest(stageId: string) {
+  async readFreshnessManifest(stageId: string): Promise<StageFreshnessManifest | null> {
     return this.readGated(stageId, () => this.inner.readFreshnessManifest(stageId));
   }
 
@@ -169,7 +171,9 @@ class OwnerBoundDocumentStore<TScene extends SceneLike, TStage extends Stage>
 export function createOwnerBoundDocumentStore<
   TScene extends SceneLike = Scene,
   TStage extends Stage = Stage,
->(options: OwnerBoundDocumentStoreOptions): DocumentStore<TScene, TStage> & DocumentFolderStore {
+>(
+  options: OwnerBoundDocumentStoreOptions,
+): DocumentStore<TScene, TStage> & DocumentFolderStore & StageFreshnessManifestStore {
   const pending: { operation?: PendingOperation } = {};
 
   const withTransaction: WithTransaction = async (body) => {
