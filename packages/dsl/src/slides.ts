@@ -61,11 +61,6 @@ export enum ElementTypes {
   CODE = 'code',
 }
 
-/**
- *
- *
- *
- */
 export type GradientType = 'linear' | 'radial';
 export type GradientColor = {
   pos: number;
@@ -79,12 +74,6 @@ export interface Gradient {
 
 export type LineStyleType = 'solid' | 'dashed' | 'dotted';
 
-/**
- *
- *
- *
- *
- */
 export interface PPTElementShadow {
   h: number;
   v: number;
@@ -92,11 +81,6 @@ export interface PPTElementShadow {
   color: string;
 }
 
-/**
- *
- *
- *
- */
 export interface PPTElementOutline {
   style?: LineStyleType;
   width?: number;
@@ -105,27 +89,11 @@ export interface PPTElementOutline {
 
 export type ElementLinkType = 'web' | 'slide';
 
-/**
- *
- *
- */
 export interface PPTElementLink {
   type: ElementLinkType;
   target: string;
 }
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTBaseElement {
   id: string;
   left: number;
@@ -151,21 +119,6 @@ export type TextType =
   | 'partNumber'
   | 'itemNumber';
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTTextElement extends PPTBaseElement {
   type: 'text';
   /** @default "" */
@@ -192,10 +145,6 @@ export interface PPTTextElement extends PPTBaseElement {
   vAlign?: 'top' | 'middle' | 'bottom';
 }
 
-/**
- *
- *
- */
 export interface ImageOrShapeFlip {
   flipH?: boolean;
   flipV?: boolean;
@@ -236,10 +185,6 @@ export interface ImageElementFilters {
 
 export type ImageClipDataRange = [[number, number], [number, number]];
 
-/**
- *
- *
- */
 export interface ImageElementClip {
   range: ImageClipDataRange;
   shape: string;
@@ -247,20 +192,6 @@ export interface ImageElementClip {
 
 export type ImageType = 'pageFigure' | 'itemFigure' | 'background';
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTImageElement extends PPTBaseElement {
   type: 'image';
   /** @default true */
@@ -290,16 +221,6 @@ export interface PPTImageElement extends PPTBaseElement {
 
 export type ShapeTextAlign = 'top' | 'middle' | 'bottom';
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface ShapeText {
   /** @default "" */
   content: string;
@@ -315,24 +236,6 @@ export interface ShapeText {
   type?: TextType;
 }
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTShapeElement extends PPTBaseElement {
   type: 'shape';
   viewBox: [number, number];
@@ -356,19 +259,6 @@ export interface PPTShapeElement extends PPTBaseElement {
 
 export type LinePoint = '' | 'arrow' | 'dot';
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTLineElement extends Omit<PPTBaseElement, 'height' | 'rotate'> {
   type: 'line';
   start: [number, number];
@@ -399,17 +289,6 @@ export interface ChartData {
   series: number[][];
 }
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTChartElement extends PPTBaseElement {
   type: 'chart';
   fill?: string;
@@ -424,17 +303,6 @@ export interface PPTChartElement extends PPTBaseElement {
 
 export type TextAlign = 'left' | 'center' | 'right' | 'justify';
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface TableCellStyle {
   bold?: boolean;
   em?: boolean;
@@ -457,13 +325,6 @@ export interface TableCellBorder {
   color: string;
 }
 
-/**
- *
- *
- *
- *
- *
- */
 export interface TableCell {
   id: string;
   colspan: number;
@@ -501,13 +362,6 @@ export interface TableCell {
   };
 }
 
-/**
- *
- *
- *
- *
- *
- */
 export interface TableTheme {
   color: string;
   rowHeader: boolean;
@@ -516,14 +370,6 @@ export interface TableTheme {
   colFooter: boolean;
 }
 
-/**
- *
- *
- *
- *
- *
- *
- */
 export interface PPTTableElement extends PPTBaseElement {
   type: 'table';
   outline: PPTElementOutline;
@@ -540,17 +386,6 @@ export interface PPTTableElement extends PPTBaseElement {
   data: TableCell[][];
 }
 
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTLatexElement extends PPTBaseElement {
   type: 'latex';
   latex: string;
@@ -563,13 +398,6 @@ export interface PPTLatexElement extends PPTBaseElement {
   align?: 'left' | 'center' | 'right';
 }
 
-/**
- *
- *
- *
- *
- *
- */
 export interface PPTVideoElement extends PPTBaseElement {
   type: 'video';
   /**
@@ -591,15 +419,6 @@ export interface PPTVideoElement extends PPTBaseElement {
   ext?: string;
 }
 
-/**
- *
- *
- *
- *
- *
- *
- *
- */
 export interface PPTAudioElement extends PPTBaseElement {
   type: 'audio';
   fixedRatio: boolean;
@@ -661,14 +480,6 @@ export type PPTElement =
 export type AnimationType = 'in' | 'out' | 'attention';
 export type AnimationTrigger = 'click' | 'meantime' | 'auto';
 
-/**
- *
- *
- *
- *
- *
- *
- */
 export interface PPTAnimation {
   id: string;
   elId: string;
@@ -685,12 +496,6 @@ export interface SlideBackgroundImage {
   size: SlideBackgroundImageSize;
 }
 
-/**
- *
- *
- *
- *
- */
 export interface SlideBackground {
   type: SlideBackgroundType;
   color?: string;
@@ -719,12 +524,6 @@ export interface SectionTag {
 
 export type SlideType = 'cover' | 'contents' | 'transition' | 'content' | 'end';
 
-/**
- *
- *
- *
- *
- */
 export interface SlideTheme {
   backgroundColor: string;
   themeColors: string[];
