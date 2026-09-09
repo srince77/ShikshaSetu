@@ -20,6 +20,7 @@
     "@ai-sdk/amazon-bedrock": "^4.0.175",
     "@shikshasetu/dsl": "workspace:*",
     "ai": "^6.0.280",
+    "argon2": "^0.45.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
@@ -44,5 +45,10 @@
     "typescript": "^5",
     "vitest": "^4.1.8"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2"
+    ]
+  }
 }
