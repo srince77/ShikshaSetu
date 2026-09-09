@@ -1,0 +1,17 @@
+{
+  "name": "@shikshasetu/dsl",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure, dependency-free course/scene/action data contract.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
