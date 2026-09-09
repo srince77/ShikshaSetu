@@ -17,6 +17,9 @@
     "db:migrate": "tsx db/migrate.ts"
   },
   "dependencies": {
+    "@ai-sdk/amazon-bedrock": "^4.0.175",
+    "@shikshasetu/dsl": "workspace:*",
+    "ai": "^6.0.280",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",

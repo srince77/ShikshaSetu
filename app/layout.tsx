@@ -14,6 +14,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600&family=Manrope:wght@400;500;600;700&family=Hind:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+        />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );
