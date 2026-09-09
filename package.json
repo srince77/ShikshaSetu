@@ -18,7 +18,11 @@
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^4.0.175",
+    "@aws-sdk/credential-providers": "^3.1045.0",
+    "@langchain/core": "^1.1.16",
+    "@langchain/langgraph": "^1.1.1",
     "@shikshasetu/dsl": "workspace:*",
+    "@shikshasetu/generation": "workspace:*",
     "ai": "^6.0.280",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
