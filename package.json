@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "jsonrepair": "^3.13.2",
     "lucide-react": "^0.562.0",
+    "nanoid": "^5.1.6",
     "next": "16.2.11",
     "partial-json": "^0.1.7",
     "pg": "^8.16.3",
