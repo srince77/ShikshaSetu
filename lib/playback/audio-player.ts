@@ -41,7 +41,11 @@ export class AudioPlayer {
   public async play(audioId: string, legacyUrl?: string): Promise<boolean> {
     const requestToken = ++this.requestToken;
     try {
-      const src = isPlayableUrl(audioId) ? audioId : legacyUrl && isPlayableUrl(legacyUrl) ? legacyUrl : null;
+      const src = isPlayableUrl(audioId)
+        ? audioId
+        : legacyUrl && isPlayableUrl(legacyUrl)
+          ? legacyUrl
+          : null;
       if (!src) return false;
 
       this.stopAudioElement();

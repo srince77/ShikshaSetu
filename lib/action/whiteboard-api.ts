@@ -42,7 +42,9 @@ export function createWhiteboardAPI(store: CourseStore) {
         const whiteboardList = state.stage?.whiteboard
           ? [...state.stage.whiteboard, whiteboard]
           : [whiteboard];
-        store.setState({ stage: state.stage ? { ...state.stage, whiteboard: whiteboardList } : state.stage });
+        store.setState({
+          stage: state.stage ? { ...state.stage, whiteboard: whiteboardList } : state.stage,
+        });
         return { success: true, data: whiteboard };
       } catch (error) {
         return { success: false, error: String(error) };

@@ -38,7 +38,11 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
     usePlaybackEngine(scenes);
 
   const currentIndex = useMemo(
-    () => Math.max(0, scenes.findIndex((s) => s.id === currentSceneId)),
+    () =>
+      Math.max(
+        0,
+        scenes.findIndex((s) => s.id === currentSceneId),
+      ),
     [scenes, currentSceneId],
   );
   const currentScene = scenes[currentIndex];

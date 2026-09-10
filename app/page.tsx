@@ -25,10 +25,7 @@ const CHIPS = [
 function BridgeMark({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" style={{ opacity: 0.9 }}>
-      <path
-        d="M16,64 A34,34 0 0 1 84,64 L72,64 A22,22 0 0 0 28,64 Z"
-        fill="var(--accent)"
-      />
+      <path d="M16,64 A34,34 0 0 1 84,64 L72,64 A22,22 0 0 0 28,64 Z" fill="var(--accent)" />
       <rect x="13" y="64" width="6" height="18" fill="var(--accent)" />
       <rect x="81" y="64" width="6" height="18" fill="var(--accent)" />
       <circle cx="50" cy="18" r="5" fill="var(--accent)" />

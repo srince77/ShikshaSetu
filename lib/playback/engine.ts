@@ -818,9 +818,7 @@ export class PlaybackEngine {
       // auto-selects an appropriate voice. Devanagari (Hindi) is checked
       // first since it's this product's second required language.
       const devanagariRatio =
-        chunkText.length > 0
-          ? (chunkText.match(/[ऀ-ॿ]/g) || []).length / chunkText.length
-          : 0;
+        chunkText.length > 0 ? (chunkText.match(/[ऀ-ॿ]/g) || []).length / chunkText.length : 0;
       const cjkRatio =
         chunkText.length > 0
           ? (chunkText.match(/[一-鿿㐀-䶿]/g) || []).length / chunkText.length

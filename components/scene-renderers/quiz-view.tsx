@@ -47,8 +47,7 @@ function gradeChoiceQuestion(
   const points = question.points ?? 1;
   const answer = question.answer ?? [];
   const given = Array.isArray(value) ? value : value ? [value] : [];
-  const isCorrect =
-    given.length === answer.length && answer.every((a) => given.includes(a));
+  const isCorrect = given.length === answer.length && answer.every((a) => given.includes(a));
   return {
     questionId: question.id,
     status: isCorrect ? 'correct' : 'incorrect',
@@ -152,7 +151,9 @@ function OptionRow({
       onClick={onClick}
       className={cn(
         'flex w-full items-center gap-3 rounded-[var(--radius-tile)] border px-4 py-3 text-left text-sm transition-colors',
-        !isReview && !selected && 'border-[var(--border)] hover:border-[var(--border-accent)] hover:bg-[var(--bg-hover-accent)]',
+        !isReview &&
+          !selected &&
+          'border-[var(--border)] hover:border-[var(--border-accent)] hover:bg-[var(--bg-hover-accent)]',
         !isReview && selected && 'border-[var(--border-accent)] bg-[var(--bg-hover-accent)]',
         isReview && isCorrectOpt && 'border-success bg-success/8',
         isReview && isWrong && !isCorrectOpt && 'border-destructive bg-destructive/8',
@@ -565,9 +566,7 @@ export function QuizView({ questions }: QuizViewProps) {
             <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
-                  Quiz report
-                </span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Quiz report</span>
               </div>
               <button
                 type="button"

@@ -24,8 +24,8 @@ export default function ClassroomPage() {
         <div className="flex max-w-sm flex-col items-center gap-2">
           <p className="text-sm font-medium text-[var(--text-primary)]">Sign-in required</p>
           <p className="text-sm text-[var(--text-tertiary)]">
-            Classroom playback needs a session. Set <code>SESSION_DEV_BYPASS=true</code> to
-            preview this page before real auth lands.
+            Classroom playback needs a session. Set <code>SESSION_DEV_BYPASS=true</code> to preview
+            this page before real auth lands.
           </p>
         </div>
       </main>
