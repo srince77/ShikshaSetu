@@ -91,6 +91,7 @@ export class PlaybackEngine {
   private browserTTSChunkIndex: number = 0; // current chunk being spoken
   private browserTTSPausedChunks: string[] = []; // remaining chunks saved on pause (for cancel+re-speak)
   private speechTimerRemaining: number = 0; // remaining ms (set on pause)
+  private lastServerTTSObjectUrl: string | null = null; // revoked before each new one is created
   private playbackGeneration: number = 0;
 
   constructor(
@@ -618,30 +619,46 @@ export class PlaybackEngine {
         // which would hang playback on that slide.
         const hasText = !!speechAction.text.trim();
 
+        const fallbackToBrowserOrTimer = () => {
+          if (!this.isCurrentGeneration(generation)) return;
+          const settings = useSettingsStore.getState();
+          if (
+            hasText &&
+            settings.ttsEnabled &&
+            settings.ttsProviderId === 'browser-native-tts' &&
+            isTTSProviderEnabled(
+              'browser-native-tts',
+              settings.ttsProvidersConfig?.['browser-native-tts'],
+            ) &&
+            typeof window !== 'undefined' &&
+            window.speechSynthesis
+          ) {
+            this.playBrowserTTS(speechAction, generation);
+          } else {
+            scheduleReadingTimer();
+          }
+        };
+
         this.audioPlayer
           .play(speechAction.audioId || '')
           .then((audioStarted) => {
             if (!this.isCurrentGeneration(generation)) return;
-            if (!audioStarted) {
-              // No pre-generated audio — try browser-native TTS only when it is
-              // the selected provider AND actually enabled (opt-in).
-              const settings = useSettingsStore.getState();
-              if (
-                hasText &&
-                settings.ttsEnabled &&
-                settings.ttsProviderId === 'browser-native-tts' &&
-                isTTSProviderEnabled(
-                  'browser-native-tts',
-                  settings.ttsProvidersConfig?.['browser-native-tts'],
-                ) &&
-                typeof window !== 'undefined' &&
-                window.speechSynthesis
-              ) {
-                this.playBrowserTTS(speechAction, generation);
-              } else {
-                scheduleReadingTimer();
-              }
+            if (audioStarted) return;
+            if (!hasText) {
+              scheduleReadingTimer();
+              return;
             }
+            // No pre-generated audio — synthesize narration on the fly via the
+            // server voice provider (ElevenLabs) before falling back to
+            // browser-native TTS or a silent reading dwell, so playback has
+            // real narration regardless of what speech voices (if any) the
+            // visitor's OS/browser happens to have installed.
+            this.fetchServerTTS(speechAction.text, generation)
+              .then((started) => {
+                if (!this.isCurrentGeneration(generation)) return;
+                if (!started) fallbackToBrowserOrTimer();
+              })
+              .catch(() => fallbackToBrowserOrTimer());
           })
           .catch((err) => {
             if (!this.isCurrentGeneration(generation)) return;
@@ -762,6 +779,36 @@ export class PlaybackEngine {
     // instead of speaking an empty utterance that never fires onend). Otherwise
     // the text had no sentence punctuation — speak it as one chunk.
     return text.trim() ? [text] : [];
+  }
+
+  /**
+   * Synthesize narration via the server voice provider (ElevenLabs, see
+   * app/api/tts) and play it through the same AudioPlayer used for
+   * pre-generated audio. Returns false (never throws) on any failure —
+   * missing API key, network error, rate limit — so the caller always has a
+   * clean fallback path to browser TTS or the reading-time dwell.
+   */
+  private async fetchServerTTS(text: string, generation: number): Promise<boolean> {
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok || !this.isCurrentGeneration(generation)) return false;
+
+      const blob = await res.blob();
+      if (!this.isCurrentGeneration(generation)) return false;
+
+      if (this.lastServerTTSObjectUrl) URL.revokeObjectURL(this.lastServerTTSObjectUrl);
+      const url = URL.createObjectURL(blob);
+      this.lastServerTTSObjectUrl = url;
+
+      return await this.audioPlayer.play(url);
+    } catch (err) {
+      log.warn('Server TTS unavailable, falling back:', err);
+      return false;
+    }
   }
 
   /**
