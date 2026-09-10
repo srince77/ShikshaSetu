@@ -1,0 +1,37 @@
+{
+  "name": "@shikshasetu/generation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure generation pipeline (outlines, scene content/actions, prompt templates) for ShikshaSetu, backed by a single AICallFn seam.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "snippets"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@shikshasetu/dsl": "workspace:*",
+    "jsonrepair": "^3.13.2",
+    "katex": "^0.16.22",
+    "nanoid": "^5.1.6",
+    "partial-json": "^0.1.7"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
