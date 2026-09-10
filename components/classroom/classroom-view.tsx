@@ -16,8 +16,10 @@ import { isQuizContent, isSlideContent } from '@shikshasetu/dsl';
 import { SlideCanvas } from '@shikshasetu/renderer';
 import { useCourseStore } from '@/lib/store/course';
 import { useCanvasStore } from '@/lib/store/canvas';
+import { useInteractiveIframePool } from '@/lib/store/interactive-iframe-pool';
 import { usePlaybackEngine } from '@/lib/playback/use-playback-engine';
 import { QuizView } from '@/components/scene-renderers/quiz-view';
+import { InteractiveIframeHost } from '@/components/scene-renderers/InteractiveIframeHost';
 import { Button } from '@/components/ui/button';
 
 const EASE_ENTRANCE = [0.16, 1, 0.3, 1] as const;
@@ -36,6 +38,11 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
 
   const { engine, mode, currentSceneId, captionText, discussionTrigger, completed } =
     usePlaybackEngine(scenes);
+
+  const setActiveIframeScene = useInteractiveIframePool((s) => s.setActive);
+  useEffect(() => {
+    if (currentSceneId) setActiveIframeScene(currentSceneId);
+  }, [currentSceneId, setActiveIframeScene]);
 
   const currentIndex = useMemo(
     () =>
@@ -175,6 +182,11 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
           </button>
         </div>
       </div>
+
+      {/* Portal host for interactive-scene iframes, kept alive across scene
+          switches; inert until a scene of type `interactive` mounts a
+          placeholder into the pool. */}
+      <InteractiveIframeHost />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { ActionEngine } from '@/lib/action/engine';
 import { PlaybackEngine } from './engine';
 import { createAudioPlayer } from './audio-player';
 import { useCourseStore } from '@/lib/store/course';
+import { useWidgetIframeStore } from '@/lib/store/widget-iframe';
 import type { EngineMode, TriggerEvent } from './types';
 
 export interface UsePlaybackEngineResult {
@@ -38,7 +39,12 @@ export function usePlaybackEngine(scenes: Scene[]): UsePlaybackEngineResult {
 
   useEffect(() => {
     const audioPlayer = createAudioPlayer();
-    const actionEngine = new ActionEngine(useCourseStore, audioPlayer);
+    // widget_* actions reach the on-screen interactive iframe (if any) through
+    // the same store InteractiveIframeHost registers its postMessage callback
+    // into, keyed by the engine's current scene rather than a fixed id.
+    const actionEngine = new ActionEngine(useCourseStore, audioPlayer, (type, payload) =>
+      useWidgetIframeStore.getState().getSendMessage()?.(type, payload),
+    );
     const engine = new PlaybackEngine(scenes, actionEngine, audioPlayer, {
       onModeChange: setMode,
       onSceneChange: setCurrentSceneId,
