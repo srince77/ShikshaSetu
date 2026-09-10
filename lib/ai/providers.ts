@@ -8,7 +8,7 @@
  */
 
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
-import type { LanguageModel } from 'ai';
+import type { EmbeddingModel, LanguageModel } from 'ai';
 
 function resolveBedrockRegion(): string {
   return (
@@ -74,4 +74,13 @@ export function resolveBedrockModelId(modelId?: string): string {
 /** Resolves a Bedrock LanguageModel instance for use with `ai`'s generateText/streamText. */
 export function getModel(modelId?: string): LanguageModel {
   return getBedrockProvider()(resolveBedrockModelId(modelId));
+}
+
+/**
+ * Resolves a Bedrock embedding model for use with `ai`'s embed/embedMany.
+ * Defaults to `amazon.titan-embed-text-v2:0` (1024-dim, matching
+ * db/migrations/0008_pgvector_1024.sql) — see lib/generation/rag/embeddings.ts.
+ */
+export function getEmbeddingModel(modelId: string = 'amazon.titan-embed-text-v2:0'): EmbeddingModel {
+  return getBedrockProvider().embedding(modelId);
 }
