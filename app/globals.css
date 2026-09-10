@@ -22,6 +22,10 @@
   --color-accent: var(--bg-hover-accent);
   --color-accent-foreground: var(--text-primary);
   --color-destructive: #c0392b;
+  /* Not part of the finalized brand palette (indigo stays the only accent) —
+     a quiet, desaturated status green for correct/incorrect quiz feedback,
+     the one place this UI needs a semantic color beyond accent/destructive. */
+  --color-success: #1f7a52;
   --color-border: var(--border);
   --color-input: var(--border);
   --color-ring: var(--border-accent);

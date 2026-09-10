@@ -1,0 +1,54 @@
+{
+  "name": "@shikshasetu/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React slide-canvas renderer for the DSL slide object model (text/image/shape/table/chart/code/latex/video elements, plus the spotlight/highlight/laser overlays).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./elements": {
+      "types": "./dist/elements/index.d.ts",
+      "import": "./dist/elements/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./snapshot": {
+      "types": "./dist/snapshot/index.d.ts",
+      "import": "./dist/snapshot/index.js"
+    },
+    "./fonts.css": "./fonts.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "echarts": ">=5",
+    "motion": ">=11",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "shiki": ">=1.0.0"
+  },
+  "dependencies": {
+    "@shikshasetu/dsl": "workspace:*",
+    "clsx": "^2.1.1",
+    "html-to-image": "^1.11.13",
+    "html2canvas-pro": "^2.0.4",
+    "tailwind-merge": "^3.4.0",
+    "tinycolor2": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/tinycolor2": "^1.4.6",
+    "typescript": "^5"
+  }
+}
