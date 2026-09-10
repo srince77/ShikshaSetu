@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, Loader2, Menu, Mic, Search, Sparkles, User, X } from 'lucide-react';
-import fixtureCourse from '@/lib/contracts/fixtures/sample-course.json';
+
+type CourseSummary = { id: string; name: string; sceneCount: number };
 
 type GenerationJob = {
   status: 'queued' | 'running' | 'succeeded' | 'failed';
@@ -51,6 +52,15 @@ export default function HomePage() {
   const [generating, setGenerating] = useState(false);
   const [genStatus, setGenStatus] = useState<string>('Starting...');
   const [genError, setGenError] = useState<string | null>(null);
+  const [courses, setCourses] = useState<CourseSummary[] | null>(null);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    fetch('/api/stages')
+      .then((res) => (res.ok ? res.json() : { stages: [] }))
+      .then((data) => setCourses(data.stages ?? []))
+      .catch(() => setCourses([]));
+  }, [sidebarOpen]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -63,10 +73,6 @@ export default function HomePage() {
     }, 2600);
     return () => clearInterval(timer);
   }, []);
-
-  const course = fixtureCourse.stage;
-
-  const goToClassroom = () => router.push('/classroom');
 
   const generateCourse = async (topic: string) => {
     const requirement = topic.trim();
@@ -228,17 +234,6 @@ export default function HomePage() {
                 {chip.label}
               </motion.button>
             ))}
-            <motion.button
-              type="button"
-              onClick={goToClassroom}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 1 + CHIPS.length * 0.18, ease: EASE_ENTRANCE }}
-              className="flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--bg-canvas)] px-4 py-2 text-[13px] text-[var(--text-label)] transition-colors hover:border-[var(--border-accent)] hover:bg-[var(--bg-hover-accent)]"
-            >
-              <Sparkles className="h-[15px] w-[15px] text-[var(--accent)]" strokeWidth={1.4} />
-              Continue &ldquo;{course.name}&rdquo;
-            </motion.button>
           </div>
         </motion.div>
       </div>
@@ -288,29 +283,34 @@ export default function HomePage() {
           </span>
         </div>
         <div className="flex flex-col gap-1 overflow-y-auto">
-          <button
-            type="button"
-            onClick={goToClassroom}
-            className="flex items-center gap-3.5 rounded-[var(--radius-card)] border border-transparent p-3.5 text-left transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-canvas)]"
-          >
-            <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[var(--radius-tile)] border border-[var(--border)] bg-[var(--bg-canvas)]">
-              <Sparkles className="h-[17px] w-[17px] text-[var(--accent)]" strokeWidth={1.4} />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <div className="truncate text-[13.5px] font-semibold text-[var(--text-primary)]">
-                {course.name}
+          {courses === null && (
+            <p className="px-1.5 py-2 text-[13px] text-[var(--text-tertiary)]">Loading...</p>
+          )}
+          {courses?.length === 0 && (
+            <p className="px-1.5 py-2 text-[13px] text-[var(--text-tertiary)]">
+              No courses yet, generate one from the home screen.
+            </p>
+          )}
+          {courses?.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => router.push(`/classroom/${c.id}`)}
+              className="flex items-center gap-3.5 rounded-[var(--radius-card)] border border-transparent p-3.5 text-left transition-colors hover:border-[var(--border)] hover:bg-[var(--bg-canvas)]"
+            >
+              <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[var(--radius-tile)] border border-[var(--border)] bg-[var(--bg-canvas)]">
+                <Sparkles className="h-[17px] w-[17px] text-[var(--accent)]" strokeWidth={1.4} />
               </div>
-              <div className="text-[11.5px] text-[var(--text-tertiary)]">
-                {course.languageDirective === 'en' ? 'English' : course.languageDirective}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <div className="truncate text-[13.5px] font-semibold text-[var(--text-primary)]">
+                  {c.name}
+                </div>
+                <div className="text-[11.5px] text-[var(--text-tertiary)]">
+                  {c.sceneCount} {c.sceneCount === 1 ? 'scene' : 'scenes'}
+                </div>
               </div>
-              <div className="h-[3px] overflow-hidden rounded-[var(--radius-pill)] bg-[var(--border)]">
-                <div
-                  className="h-full rounded-[var(--radius-pill)] bg-[var(--accent)]"
-                  style={{ width: '35%' }}
-                />
-              </div>
-            </div>
-          </button>
+            </button>
+          ))}
         </div>
       </motion.div>
     </main>
