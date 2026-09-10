@@ -2,17 +2,26 @@
 
 /**
  * Home page — rebuilt from the "Paper White" hero mockup
- * (design-refs/Main-html/Main.dc.html) as real React, wired to the fixture
- * course fixture (no real course list/generation pipeline in this phase).
- * The chat input and suggestion chips are cosmetically complete but route to
- * /classroom rather than a real generation call — the closest honest
- * "demoable" path until the chat-driven builder lands.
+ * (design-refs/Main-html/Main.dc.html). Submitting the prompt (or a chip)
+ * calls the real generation pipeline (/api/generate-classroom), polls the
+ * job, and lands on the real generated course at /classroom/[id]. The
+ * sidebar's "Continue" entry still points at the hand-authored fixture
+ * course as a known-good fallback.
  */
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUp, Menu, Mic, Search, Sparkles, User, X } from 'lucide-react';
+import { ArrowUp, Loader2, Menu, Mic, Search, Sparkles, User, X } from 'lucide-react';
 import fixtureCourse from '@/lib/contracts/fixtures/sample-course.json';
+
+type GenerationJob = {
+  status: 'queued' | 'running' | 'succeeded' | 'failed';
+  message?: string;
+  stageId?: string;
+  error?: string;
+};
+
+const POLL_INTERVAL_MS = 2500;
 
 const EASE_ENTRANCE = [0.16, 1, 0.3, 1] as const;
 const WORDS = ['Learn', 'Understand', 'Build', 'Liberate'];
@@ -39,6 +48,9 @@ export default function HomePage() {
   const [wordIndex, setWordIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const [prompt, setPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [genStatus, setGenStatus] = useState<string>('Starting...');
+  const [genError, setGenError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -55,6 +67,45 @@ export default function HomePage() {
   const course = fixtureCourse.stage;
 
   const goToClassroom = () => router.push('/classroom');
+
+  const generateCourse = async (topic: string) => {
+    const requirement = topic.trim();
+    if (!requirement || generating) return;
+    setGenerating(true);
+    setGenError(null);
+    setGenStatus('Starting...');
+    try {
+      const submitRes = await fetch('/api/generate-classroom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requirement }),
+      });
+      if (!submitRes.ok) {
+        const body = await submitRes.json().catch(() => ({}));
+        throw new Error(body.error || 'Could not start generation');
+      }
+      const { jobId } = await submitRes.json();
+
+      for (;;) {
+        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+        const pollRes = await fetch(`/api/generate-classroom/${jobId}`);
+        if (!pollRes.ok) throw new Error('Lost track of the generation job');
+        const job: GenerationJob = await pollRes.json();
+
+        if (job.status === 'succeeded' && job.stageId) {
+          router.push(`/classroom/${job.stageId}`);
+          return;
+        }
+        if (job.status === 'failed') {
+          throw new Error(job.error || 'Generation failed');
+        }
+        setGenStatus(job.message || job.status);
+      }
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : 'Something went wrong');
+      setGenerating(false);
+    }
+  };
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-[var(--bg-canvas)]">
@@ -114,7 +165,7 @@ export default function HomePage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              goToClassroom();
+              generateCourse(prompt);
             }}
             className="flex w-[min(680px,88vw)] items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--bg-canvas)] py-2 pl-5 pr-2 shadow-[var(--shadow-xs),var(--shadow-lg)]"
           >
@@ -129,8 +180,9 @@ export default function HomePage() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               type="text"
+              disabled={generating}
               placeholder="Ask anything, or start a new lesson..."
-              className="flex-1 border-none bg-transparent py-1.5 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-placeholder)]"
+              className="flex-1 border-none bg-transparent py-1.5 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-placeholder)] disabled:opacity-50"
             />
             <button
               type="button"
@@ -141,23 +193,36 @@ export default function HomePage() {
             </button>
             <button
               type="submit"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white transition-transform hover:scale-[1.06]"
+              disabled={generating}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white transition-transform hover:scale-[1.06] disabled:opacity-60"
               aria-label="Send"
             >
-              <ArrowUp className="h-4 w-4" strokeWidth={1.8} />
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.8} />
+              ) : (
+                <ArrowUp className="h-4 w-4" strokeWidth={1.8} />
+              )}
             </button>
           </form>
+
+          {generating && (
+            <p className="text-[13px] text-[var(--text-tertiary)]">{genStatus}</p>
+          )}
+          {genError && (
+            <p className="text-[13px] text-[var(--color-destructive)]">{genError}</p>
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             {CHIPS.map((chip, i) => (
               <motion.button
                 key={chip.label}
                 type="button"
-                onClick={goToClassroom}
+                disabled={generating}
+                onClick={() => generateCourse(chip.label)}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 1 + i * 0.18, ease: EASE_ENTRANCE }}
-                className="flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--bg-canvas)] px-4 py-2 text-[13px] text-[var(--text-label)] transition-colors hover:border-[var(--border-accent)] hover:bg-[var(--bg-hover-accent)]"
+                className="flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--bg-canvas)] px-4 py-2 text-[13px] text-[var(--text-label)] transition-colors hover:border-[var(--border-accent)] hover:bg-[var(--bg-hover-accent)] disabled:opacity-50"
               >
                 <chip.icon className="h-[15px] w-[15px] text-[var(--accent)]" strokeWidth={1.4} />
                 {chip.label}
