@@ -87,3 +87,23 @@ export async function markGenerationComplete(stageId: string): Promise<void> {
     stageId,
   ]);
 }
+
+/** Read one stage document by id. */
+export async function getStage(stageId: string): Promise<Stage | undefined> {
+  const pool = getPool();
+  const result = await pool.query<{ data: Stage }>(
+    'SELECT data FROM document_stages WHERE id = $1',
+    [stageId],
+  );
+  return result.rows[0]?.data;
+}
+
+/** Read every generated scene for a stage, in playback order. */
+export async function listScenes(stageId: string): Promise<PersistableScene[]> {
+  const pool = getPool();
+  const result = await pool.query<{ data: PersistableScene }>(
+    'SELECT data FROM document_scenes WHERE stage_id = $1 ORDER BY scene_order',
+    [stageId],
+  );
+  return result.rows.map((row) => row.data);
+}
