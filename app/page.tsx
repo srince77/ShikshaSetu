@@ -5,10 +5,9 @@
  * (design-refs/Main-html/Main.dc.html). Submitting the prompt (or a chip)
  * calls the real generation pipeline (/api/generate-classroom), polls the
  * job, and lands on the real generated course at /classroom/[id]. The
- * sidebar's "Continue" entry still points at the hand-authored fixture
- * course as a known-good fallback.
+ * sidebar shows the visitor's real courses, fetched from /api/stages.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, Loader2, Menu, Mic, Search, Sparkles, User, X } from 'lucide-react';
@@ -53,6 +52,52 @@ export default function HomePage() {
   const [genStatus, setGenStatus] = useState<string>('Starting...');
   const [genError, setGenError] = useState<string | null>(null);
   const [courses, setCourses] = useState<CourseSummary[] | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const toggleRecording = async () => {
+    if (recording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+    setGenError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+        setTranscribing(true);
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+          const formData = new FormData();
+          formData.append('file', blob, 'recording.webm');
+          const res = await fetch('/api/asr', { method: 'POST', body: formData });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || 'Could not transcribe audio');
+          }
+          const { text } = await res.json();
+          if (text) setPrompt((prev) => (prev ? `${prev} ${text}` : text));
+        } catch (err) {
+          setGenError(err instanceof Error ? err.message : 'Voice input failed');
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setGenError('Microphone access was denied or is unavailable');
+    }
+  };
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -192,10 +237,20 @@ export default function HomePage() {
             />
             <button
               type="button"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[var(--bg-hover)]"
-              aria-label="Voice input"
+              onClick={toggleRecording}
+              disabled={generating || transcribing}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-50"
+              aria-label={recording ? 'Stop recording' : 'Voice input'}
             >
-              <Mic className="h-[17px] w-[17px] text-[var(--text-tertiary)]" strokeWidth={1.5} />
+              {transcribing ? (
+                <Loader2 className="h-[17px] w-[17px] animate-spin text-[var(--text-tertiary)]" strokeWidth={1.5} />
+              ) : (
+                <Mic
+                  className="h-[17px] w-[17px]"
+                  strokeWidth={1.5}
+                  style={{ color: recording ? '#c0392b' : 'var(--text-tertiary)' }}
+                />
+              )}
             </button>
             <button
               type="submit"

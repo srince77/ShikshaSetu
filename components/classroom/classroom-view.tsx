@@ -10,7 +10,7 @@
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Pause, Play, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from 'lucide-react';
 import type { Stage, Scene } from '@shikshasetu/dsl';
 import { isQuizContent, isSlideContent } from '@shikshasetu/dsl';
 import { SlideCanvas } from '@shikshasetu/renderer';
@@ -106,7 +106,7 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
             className="flex h-full w-full max-w-4xl items-center justify-center"
           >
             {isSlide && (
-              <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)]">
+              <div className="h-full w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)]">
                 <SlideCanvas slide={currentScene.content.canvas} effects={effects} />
               </div>
             )}
@@ -162,6 +162,15 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
           </button>
           <button
             type="button"
+            onClick={() => engine?.previousScene()}
+            disabled={currentIndex === 0}
+            className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-30"
+            aria-label="Previous scene"
+          >
+            <ChevronLeft className="h-4 w-4 text-[var(--text-tertiary)]" strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
             onClick={() => {
               if (completed || mode === 'idle') {
                 engine?.start();
@@ -179,6 +188,15 @@ export function ClassroomView({ course }: { course: { stage: Stage; scenes: Scen
             ) : (
               <Play className="ml-0.5 h-4 w-4" strokeWidth={2} fill="currentColor" />
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => engine?.nextScene()}
+            disabled={currentIndex >= scenes.length - 1}
+            className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-30"
+            aria-label="Next scene, skip ahead"
+          >
+            <ChevronRight className="h-4 w-4 text-[var(--text-tertiary)]" strokeWidth={1.5} />
           </button>
         </div>
       </div>

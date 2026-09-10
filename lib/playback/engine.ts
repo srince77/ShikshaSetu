@@ -217,6 +217,47 @@ export class PlaybackEngine {
     return true;
   }
 
+  /**
+   * Jump directly to the start of a scene, canceling any in-flight audio/
+   * timers first. Used for manual scene navigation (previous/next), distinct
+   * from `jumpToAction`, which scrubs within a single scene's own timeline.
+   */
+  goToScene(sceneIndex: number, options: { autoplay?: boolean } = {}): boolean {
+    if (sceneIndex < 0 || sceneIndex >= this.scenes.length) return false;
+    if (this.mode === 'live') return false; // don't interrupt a live discussion mid-flight
+
+    const autoplay = options.autoplay ?? this.mode === 'playing';
+    const generation = this.invalidatePlaybackGeneration();
+    this.cancelActivePlaybackWork();
+    this.sceneIndex = sceneIndex;
+    this.actionIndex = 0;
+    this.savedSceneIndex = null;
+    this.savedActionIndex = null;
+    this.currentTopicState = null;
+    this.currentTrigger = null;
+
+    if (autoplay) {
+      this.setMode('playing');
+      this.processNext(generation);
+    } else {
+      this.setMode('paused');
+      // processNext() is what normally fires onSceneChange, but it only runs
+      // in 'playing' mode — fire it directly so a paused jump still updates
+      // which scene is on screen.
+      const scene = this.scenes[sceneIndex];
+      if (scene) this.callbacks.onSceneChange?.(scene.id);
+    }
+    return true;
+  }
+
+  nextScene(): boolean {
+    return this.goToScene(this.sceneIndex + 1);
+  }
+
+  previousScene(): boolean {
+    return this.goToScene(this.sceneIndex - 1);
+  }
+
   /** playing → paused | live → paused (abort SSE, truncate, topic pending) */
   pause(): void {
     if (this.mode === 'playing') {
